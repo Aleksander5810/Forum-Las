@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Forum</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: auto; }
+    .post { border: 1px solid #ccc; padding: 10px; margin: 10px 0; border-radius: 8px; }
+    input, textarea { width: 100%; margin-top: 5px; }
+    button { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h2>Mini Forum</h2>
+
+  <div>
+    <label>Nick: <input id="nick" /></label><br>
+    <label>Wiadomość:<br><textarea id="message"></textarea></label><br>
+    <button onclick="addPost()">Dodaj post</button>
+  </div>
+
+  <h3>Posty:</h3>
+  <div id="posts"></div>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbxgNawjtO7VsIaGR7aqdCRoKp-UvUjezxk1RVCNQoGmwXuyexCmUSxZwu_Ia8MSgJ7U0g/exec/exec';
+
+    async function loadPosts() {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      const container = document.getElementById("posts");
+      container.innerHTML = '';
+      data.reverse().forEach(post => {
+        container.innerHTML += `
+          <div class="post">
+            <strong>${post.nick}</strong> <em>${post.date}</em><br>
+            ${post.message}
+          </div>`;
+      });
+    }
+
+    async function addPost() {
+      const nick = document.getElementById("nick").value.trim();
+      const message = document.getElementById("message").value.trim();
+      if (!nick || !message) return alert("Wpisz nick i wiadomość!");
+
+      await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ nick, message }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      document.getElementById("message").value = "";
+      loadPosts();
+    }
+
+    loadPosts();
+  </script>
+</body>
+</html>
